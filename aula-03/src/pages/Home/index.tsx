@@ -4,13 +4,24 @@ import { Button } from '../../components/Button';
 import { TextInput } from '../../components/TextInput';
 import { Repository } from '../../types/repository';
 
-import { Container } from './styles';
+import { 
+    Container,
+    Loader,
+    Error,
+    RepositoryWrapper,
+    RepositoryInfos,
+    Image,
+    RepositoryOwnerInfo,
+    RepositoryName,
+    RepositoryDescription,
+    LinkIcon,
+} from './styles';
 
 export const Home: React.FC = () => {
     const [inputValue, setInputValue] = useState('');
     const [repositories, setRepositories] = useState<Repository[]>([]);
 
-    const { data, refetch } = useRepositories(inputValue, {
+    const { data, isLoading, isError, refetch } = useRepositories(inputValue, {
         enabled: false,
     });
     
@@ -24,7 +35,7 @@ export const Home: React.FC = () => {
 
     useEffect(() => {
         if (data) setRepositories(old => [...old, data]);
-    }, [data])
+    }, [data]);
 
     return (
         <Container>
@@ -44,12 +55,31 @@ export const Home: React.FC = () => {
             </header>
 
             <section>
+                {isLoading && (
+                    <Loader>Carregando...</Loader>
+                )}
+                {isError && (
+                    <Error>
+                        Houve um erro ao buscar o repositório. Por favor, tente novamente.
+                    </Error>
+                )}
                 {repositories && repositories.map(repo => (
-                    <div key={repo.id}>
-                        <p>{repo.full_name}</p>
-                    </div>
+                    <RepositoryWrapper key={repo.id}>
+                        <RepositoryInfos>
+                            <Image src={repo.owner.avatar_url} />
+                            <RepositoryOwnerInfo>
+                                <RepositoryName>
+                                    {repo.full_name}
+                                </RepositoryName>
+                                <RepositoryDescription>
+                                    {repo.description}
+                                </RepositoryDescription>
+                            </RepositoryOwnerInfo>
+                        </RepositoryInfos>
+                        <LinkIcon>{'>'}</LinkIcon>
+                    </RepositoryWrapper>
                 ))}
             </section>
         </Container>
-    )
+    );
 }
